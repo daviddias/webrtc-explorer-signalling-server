@@ -1,0 +1,31 @@
+{
+  "name": "webrtc-chord-signaling-server",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "hapi": "^6.11.1",
+    "socket.io": "^1.1.0"
+  },
+  "devDependencies": {
+    "jshint": "^2.5.6",
+    "lab": "^4.6.2",
+    "precommit-hook": "^1.0.7",
+    "socket.io-client": "^1.1.0",
+    "tap-spec": "^1.0.0"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "test": "node ./node_modules/.bin/lab -r tap tests/*-test.js | ./node_modules/.bin/tap-spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/diasdavid/webrtc-chord-signaling-server.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/diasdavid/webrtc-chord-signaling-server/issues"
+  },
+  "homepage": "https://github.com/diasdavid/webrtc-chord-signaling-server"
+}
