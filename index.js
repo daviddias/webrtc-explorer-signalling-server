@@ -25,8 +25,6 @@ function ioConnectionHandler(socket) {
   console.log('New peer connect with socket ID of: ', socket.id);
   peerTable[socket.id] = socket;
 
-  // socket.emit('c-established', {peersAvailable: arePeersAvailable()}); 
-
   function peerConnectRequest (peerInvite) {
     var peersAvailable = arePeersAvailable();
     if (!peersAvailable) {
@@ -41,18 +39,14 @@ function ioConnectionHandler(socket) {
     peerTable[peerInvite.ticket.solicited].emit('c-request', peerInvite);
   }
 
-
   function peerConnectResponse (peerInvite) {
     peerTable[peerInvite.ticket.requester].emit('c-response', peerInvite);
   }
-
 
   function peerRemove() { 
     console.log('socket disconnect with ID: ', socket.id);      
     delete peerTable[socket.id];
   }
-
-
 }
 
 function arePeersAvailable() {
@@ -75,3 +69,4 @@ function notSamePeer(id) {
     }
   }
 }
+
