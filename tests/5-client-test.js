@@ -60,47 +60,27 @@ experiment('Serving 2 Client.', function () {
 
   test('connect the first client', function (done) {
     client_1 = io.connect(socketURL, options);
-
-    client_1.on('c-connection-established', function(data) {
-      expect(data).to.have.property('peersAvailable').to.equal(false);
-      done();
-    });
+    client_1.on('connect', function() { done(); });
   });
 
   test('connect the second client', function (done) {
     client_2 = io.connect(socketURL, options);
-
-    client_2.on('c-connection-established', function(data) {
-      expect(data).to.have.property('peersAvailable').to.equal(true);
-      done();
-    });
+    client_2.on('connect', function() { done(); });
   });
 
   test('connect the third client', function (done) {
     client_3 = io.connect(socketURL, options);
-
-    client_3.on('c-connection-established', function(data) {
-      expect(data).to.have.property('peersAvailable').to.equal(true);
-      done();
-    });
+    client_3.on('connect', function() { done(); });
   });
 
   test('connect the fourth client', function (done) {
     client_4 = io.connect(socketURL, options);
-
-    client_4.on('c-connection-established', function(data) {
-      expect(data).to.have.property('peersAvailable').to.equal(true);
-      done();
-    });
+    client_4.on('connect', function() { done(); });
   });
 
   test('connect the fifth client', function (done) {
     client_5 = io.connect(socketURL, options);
-
-    client_5.on('c-connection-established', function(data) {
-      expect(data).to.have.property('peersAvailable').to.equal(true);
-      done();
-    });
+    client_5.on('connect', function() { done(); });
   });
 
   test('connect to one of the clients', function (done) {
@@ -108,42 +88,42 @@ experiment('Serving 2 Client.', function () {
       signalData: 'signaling data that will passed by the browsers'
     };
     
-    client_2.on('c-connection-request', function (data) {
+    client_2.on('c-request', function (data) {
       expect(data).has.property('signalData');
       expect(data.ticket.requester).to.not.equal(data.ticket.solicited);
       data.signalData = 'update signal data';
-      client_2.emit('s-connect-response', data);
+      client_2.emit('s-response', data);
     });
     
-    client_3.on('c-connection-request', function (data) {
+    client_3.on('c-request', function (data) {
       expect(data).has.property('signalData');
       expect(data.ticket.requester).to.not.equal(data.ticket.solicited);
       data.signalData = 'update signal data';
-      client_3.emit('s-connect-response', data);
+      client_3.emit('s-response', data);
     });
 
-    client_4.on('c-connection-request', function (data) {
+    client_4.on('c-request', function (data) {
       expect(data).has.property('signalData');
       expect(data.ticket.requester).to.not.equal(data.ticket.solicited);
       data.signalData = 'update signal data';
-      client_4.emit('s-connect-response', data);
+      client_4.emit('s-response', data);
     });
 
-    client_5.on('c-connection-request', function (data) {
+    client_5.on('c-request', function (data) {
       expect(data).has.property('signalData');
       expect(data.ticket.requester).to.not.equal(data.ticket.solicited);
       data.signalData = 'update signal data';
-      client_5.emit('s-connect-response', data);
+      client_5.emit('s-response', data);
     });
 
-    client_1.on('c-connection-response', function(data) {
+    client_1.on('c-response', function(data) {
       expect(data).has.property('signalData');
       expect(data.signalData).to.equal('update signal data');
       expect(data.ticket.requester).to.not.equal(data.ticket.solicited);  
       done();
     });
 
-    client_1.emit('s-connect-request', peerInvite);
+    client_1.emit('s-request', peerInvite);
   });
 
 

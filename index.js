@@ -18,24 +18,19 @@ function hapiStarted() {
 }
 
 function ioConnectionHandler(socket) {
-  socket.on('s-connect-request',  peerConnectRequest);
-  socket.on('s-connect-response', peerConnectResponse);
-  
-  socket.on('disconnect', function () { // socket.io own event
-    console.log('socket disconnect with ID: ', socket.id);      
-    delete peerTable[socket.id];
-  });
+  socket.on('s-request',  peerConnectRequest);
+  socket.on('s-response', peerConnectResponse);
+  socket.on('disconnect', peerRemove); // socket.io own event
 
   console.log('New peer connect with socket ID of: ', socket.id);
   peerTable[socket.id] = socket;
 
-  socket.emit('c-connection-established', {peersAvailable: arePeersAvailable()}); 
+  // socket.emit('c-established', {peersAvailable: arePeersAvailable()}); 
 
   function peerConnectRequest (peerInvite) {
-
     var peersAvailable = arePeersAvailable();
     if (!peersAvailable) {
-      return socket.emit('c-connection-response', {peersAvailable: peersAvailable});
+      return socket.emit('c-response', {peersAvailable: peersAvailable});
     }
 
     peerInvite.ticket = {
@@ -43,13 +38,21 @@ function ioConnectionHandler(socket) {
       solicited: notSamePeer(socket.id)
     };
     
-    peerTable[peerInvite.ticket.solicited].emit('c-connection-request', peerInvite);
+    peerTable[peerInvite.ticket.solicited].emit('c-request', peerInvite);
   }
 
 
   function peerConnectResponse (peerInvite) {
-    peerTable[peerInvite.ticket.requester].emit('c-connection-response', peerInvite);
+    peerTable[peerInvite.ticket.requester].emit('c-response', peerInvite);
   }
+
+
+  function peerRemove() { 
+    console.log('socket disconnect with ID: ', socket.id);      
+    delete peerTable[socket.id];
+  }
+
+
 }
 
 function arePeersAvailable() {

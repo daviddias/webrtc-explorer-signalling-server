@@ -52,20 +52,16 @@ experiment('Serving 1 Client.', function () {
 
   test('client connects to the server and there are no more peers', function (done) {
     client = io.connect(socketURL, options);
-
-    client.on('c-connection-established', function(data) {
-      expect(data).to.have.property('peersAvailable').to.equal(false);
-      done();
-    });
+    client.on('connect', function() { done(); });
   });
 
 
   test('client tries to connect to another peers and there is 0', function (done) {
-    client.on('c-connection-request', function(data) {
+    client.on('c-request', function(data) {
       // this shouldn't ever happen
     });
 
-    client.on('c-connection-response', function(data) {
+    client.on('c-response', function(data) {
       expect(data).to.have.property('peersAvailable').to.equal(false);
       done();
     });
@@ -74,6 +70,6 @@ experiment('Serving 1 Client.', function () {
       signalData: 'signaling data that will passed by the browsers'
     };
 
-    client.emit('s-connect-request', peerInvite);
+    client.emit('s-request', peerInvite);
   });
 });
