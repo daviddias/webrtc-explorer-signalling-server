@@ -1,7 +1,7 @@
 var hapi = require('Hapi');
 var io   = require('socket.io');
 
-var server = new hapi.Server(9000, { cors: true });
+var server = new hapi.Server(parseInt(process.env.PORT) || 9000, { cors: true });
 var peerTable = {};
 
 
@@ -14,7 +14,7 @@ server.start(hapiStarted);
 
 function hapiStarted() {
   io.listen(server.listener).on('connection', ioConnectionHandler);
-  console.log('Signaling Server Started');
+  console.log('Signaling server has started on:', server.info.uri);
 }
 
 function ioConnectionHandler(socket) {
