@@ -1,9 +1,26 @@
 var hapi = require('Hapi');
 var io   = require('socket.io');
+var bigInt = require('big-integer');
 
 var server = new hapi.Server(parseInt(process.env.PORT) || 9000, { cors: true });
-var peerTable = {};
-
+var booted = false;
+var socketId_peerId = {};
+var peerTable = {}; 
+// { 
+//   peerId: { 
+//     socket: socket,
+//     invite: {
+//        peerId: <this peerId>
+//        predecessor: '<signaldata>',
+//        sucessor: '<signaldata>'
+//     },
+//     inviteReply: {
+//        peerId: <this peerId>,
+//        predecessor: '<signaldata>',
+//        sucessor: '<signaldata>'
+//   },
+//   ...
+// } 
 
 server.route({ 
   method: 'GET', path: '/', 
@@ -18,55 +35,127 @@ function hapiStarted() {
 }
 
 function ioConnectionHandler(socket) {
-  socket.on('s-request',  peerConnectRequest);
-  socket.on('s-response', peerConnectResponse);
+  // console.log('New peer connect with socket ID of: ', socket.id);
+
+  socket.on('s-join',  peerJoinRequest);
+  socket.on('s-response', peerJoinResponse);
   socket.on('disconnect', peerRemove); // socket.io own event
 
-  console.log('New peer connect with socket ID of: ', socket.id);
-  peerTable[socket.id] = socket;
+  function peerJoinRequest (invite) {
+    console.log('peer { peerId: %s } is requesting to join the network', invite.peerId);
 
-  function peerConnectRequest (peerInvite) {
-    var peersAvailable = arePeersAvailable();
-    if (!peersAvailable) {
-      return socket.emit('c-response', {peersAvailable: peersAvailable});
-    }
+    if (!bootstrap(invite, socket)) { return; }
 
-    peerInvite.ticket = {
-      requester: socket.id,
-      solicited: notSamePeer(socket.id)
-    };
-    
-    peerTable[peerInvite.ticket.solicited].emit('c-request', peerInvite);
+    /// do normal join process
+    addPeerToTable(invite, socket);
+
+    var p_s = predecessorAndSucessor(invite.peerId);
+    peerTable[p_s.predecessorId].socket.emit('c-predecessor', invite);
+    peerTable[p_s.sucessorId].socket.emit('c-sucessor', invite);
   }
 
-  function peerConnectResponse (peerInvite) {
-    peerTable[peerInvite.ticket.requester].emit('c-response', peerInvite);
+  function peerJoinResponse (inviteReply) {
+
+    if (inviteReply.predecessor) {
+      console.log('received predecessor data for peer { peerId: %s }', inviteReply.peerId);
+      peerTable[inviteReply.peerId].inviteReply.predecessor = inviteReply.predecessor;
+    }
+    if (inviteReply.sucessor) {
+      console.log('received sucessor data for peer { peerId: %s }', inviteReply.peerId);
+      peerTable[inviteReply.peerId].inviteReply.sucessor = inviteReply.sucessor;
+    }
+    // if we have both responses from sucessor and predecessor, send to peer who iniatiated
+    if (peerTable[inviteReply.peerId].inviteReply.predecessor && peerTable[inviteReply.peerId].inviteReply.sucessor) {
+      console.log('Sending c-response to peer with id:', inviteReply.peerId);
+      peerTable[inviteReply.peerId].socket.emit('c-response', peerTable[inviteReply.peerId].inviteReply);
+    }
   }
 
   function peerRemove() { 
-    console.log('socket disconnect with ID: ', socket.id);      
-    delete peerTable[socket.id];
+    // console.log('peer disconnect with socketID: %s and peerId: %s ', socket.id, socketId_peerId[socket.id]);      
+    delete peerTable[socketId_peerId[socket.id]];
+    delete socketId_peerId[socket.id];
   }
 }
 
-function arePeersAvailable() {
-  if (Object.keys(peerTable).length > 1) {
-    return true;
+function bootstrap(invite, socket) {
+  if (booted) { 
+    console.log('the chord has been booted');
+    return true; 
   }
-  else {
-    return false;
-  }
+
+  if (Object.keys(peerTable).length < 5) {
+    addPeerToTable(invite, socket);
+  } 
+
+  var peerIds = Object.keys(peerTable);
+  // console.log('We now have %d', peerIds.length);
+
+  if (peerIds.length >= 5) {
+    var sortedPeerTable = sortPeerTable();
+    peerIds.map(function (peerId) {   
+      var p_s = predecessorAndSucessor(peerId, sortedPeerTable);
+      peerTable[p_s.predecessorId].socket.emit('c-predecessor', peerTable[peerId].invite);
+      peerTable[p_s.sucessorId].socket.emit('c-sucessor', peerTable[peerId].invite);
+    });
+    booted = true;
+  } 
+
+  return false; // to not do the normal process
 }
 
-function notSamePeer(id) {
-  var peerIdList = Object.keys(peerTable);
+function predecessorAndSucessor (peerId, sortedPeerTable) {
+  var s = sortedPeerTable || sortPeerTable();
+  var r = {};
+  var done = false;
 
-  for (var i=0; peerIdList.length; i++) {
-    if (peerIdList[i] !== id) {
-      return peerIdList[i];
-    } else {
-      continue;
+  s.forEach(function (value, index) {
+    if (value === peerId && !done) {
+      done = true;
+      if(index === 0) {
+        r.predecessorId = s[s.length-1];
+        r.sucessorId = s[index+1];
+        return;
+      }
+      if(index === s.length-1){
+        r.predecessorId = s[index-1];
+        r.sucessorId = s[0];
+        return;
+      }
+      r.predecessorId = s[index-1];
+      r.sucessorId = s[index+1];
     }
-  }
+  });
+  return r;
 }
 
+
+function sortPeerTable() {
+  var sorted = Object
+                .keys(peerTable)
+                .sort(function(a, b) {
+                  var aBig = bigInt(a, 16);
+                  var bBig = bigInt(b, 16); 
+                  if (aBig.lesser(bBig)) { 
+                    return -1; 
+                  }
+                  if (aBig.greater(bBig)) {
+                    return 1; 
+                  }
+
+                  return 0;
+                });
+                // .map(function(key){
+                //   return peerTable[key];
+                // });         
+  return sorted;
+}
+
+function addPeerToTable(invite, socket) {
+  peerTable[invite.peerId] = {
+    socket: socket,
+    invite: invite,
+    inviteReply: {}
+  };
+  socketId_peerId[socket.id] = invite.peerId;
+}
