@@ -35,10 +35,10 @@ experiment('Serving 2 Client.', function () {
   before(function (done) {
     server = spawn('node', ['./index.js']);
     server.stdout.on('data', function (data) {
-      console.log('stdout: ' + data);
+      // console.log('stdout: ' + data);
     });
     server.stderr.on('data', function (data) {
-      console.log('stderr: ' + data);
+      // console.log('stderr: ' + data);
     });
 
     setTimeout(function () { 
@@ -98,13 +98,14 @@ experiment('Serving 2 Client.', function () {
     });
   });
 
+
   test('first of 5 clients joins', function (done) {
     peer_1_Id = idGen();
 
     var invite = {
       peerId: peer_1_Id,
-      predecessor: 'THIS WOULD BE SIGNAL DATA',
-      sucessor: 'THIS WOULD BE SIGNAL DATA'
+      predecessor: '1-P',
+      sucessor: '1-S'
     };
 
     client_1.emit('s-join', invite);
@@ -116,8 +117,8 @@ experiment('Serving 2 Client.', function () {
 
     var invite = {
       peerId: peer_2_Id,
-      predecessor: 'THIS WOULD BE SIGNAL DATA',
-      sucessor: 'THIS WOULD BE SIGNAL DATA'
+      predecessor: '2-P',
+      sucessor: '2-S'
     };
 
     client_2.emit('s-join', invite);
@@ -129,8 +130,8 @@ experiment('Serving 2 Client.', function () {
 
     var invite = {
       peerId: peer_3_Id,
-      predecessor: 'THIS WOULD BE SIGNAL DATA',
-      sucessor: 'THIS WOULD BE SIGNAL DATA'
+      predecessor: '3-P',
+      sucessor: '3-S'
     };
 
     client_3.emit('s-join', invite);
@@ -142,8 +143,8 @@ experiment('Serving 2 Client.', function () {
 
     var invite = {
       peerId: peer_4_Id,
-      predecessor: 'THIS WOULD BE SIGNAL DATA',
-      sucessor: 'THIS WOULD BE SIGNAL DATA'
+      predecessor: '4-P',
+      sucessor: '4-S'
     };
 
     client_4.emit('s-join', invite);
@@ -151,93 +152,7 @@ experiment('Serving 2 Client.', function () {
   });  
 
   test('last of 5 clients join and network gets bootstrapped', {timeout: 1 * 60 * 1000},function (done) {
-    var sucessorArr = [];
-    var predecessorArr = [];
     var responseArr = [];
-
-    client_1.on('c-sucessor', function (invite) {
-
-      sucessorArr.push(invite);
-      
-      var inviteReply = {};
-      inviteReply.peerId = invite.peerId;
-      inviteReply.sucessor = 'c_1';
-
-      client_1.emit('s-response', inviteReply);
-    });
-
-    client_2.on('c-sucessor', function (invite) {
-
-      sucessorArr.push(invite);
-      var inviteReply = {};
-      inviteReply.peerId = invite.peerId;
-      inviteReply.sucessor = 'c_2';
-      client_2.emit('s-response', inviteReply);
-    });
-
-    client_3.on('c-sucessor', function (invite) {
-
-      sucessorArr.push(invite);
-      var inviteReply = {};
-      inviteReply.peerId = invite.peerId;
-      inviteReply.sucessor = 'c_3';
-      client_3.emit('s-response', inviteReply);
-    });
-
-    client_4.on('c-sucessor', function (invite) {
-
-      sucessorArr.push(invite);
-      var inviteReply = {};
-      inviteReply.peerId = invite.peerId;
-      inviteReply.sucessor = 'c_4';
-      client_4.emit('s-response', inviteReply);
-    });
-
-    client_5.on('c-sucessor', function (invite) {
-
-      sucessorArr.push(invite);
-      var inviteReply = {};
-      inviteReply.peerId = invite.peerId;
-      inviteReply.sucessor = 'c_5';
-      client_5.emit('s-response', inviteReply);
-    });
-
-    client_1.on('c-predecessor', function (invite) {
-
-      predecessorArr.push(invite);
-      var inviteReply = {};
-      inviteReply.peerId = invite.peerId;
-      inviteReply.predecessor = 'other SIGNAL DATA';
-      client_1.emit('s-response', inviteReply);
-    });
-    client_2.on('c-predecessor', function (invite) {
-      predecessorArr.push(invite);
-      var inviteReply = {};
-      inviteReply.peerId = invite.peerId;
-      inviteReply.predecessor = 'other SIGNAL DATA';
-      client_2.emit('s-response', inviteReply);
-    });
-    client_3.on('c-predecessor', function (invite) {
-      predecessorArr.push(invite);
-      var inviteReply = {};
-      inviteReply.peerId = invite.peerId;
-      inviteReply.predecessor = 'other SIGNAL DATA';
-      client_3.emit('s-response', inviteReply);
-    });
-    client_4.on('c-predecessor', function (invite) {
-      predecessorArr.push(invite);
-      var inviteReply = {};
-      inviteReply.peerId = invite.peerId;
-      inviteReply.predecessor = 'other SIGNAL DATA';
-      client_4.emit('s-response', inviteReply);
-    });
-    client_5.on('c-predecessor', function (invite) {
-      predecessorArr.push(invite);
-      var inviteReply = {};
-      inviteReply.peerId = invite.peerId;
-      inviteReply.predecessor = 'other SIGNAL DATA';
-      client_5.emit('s-response', inviteReply);
-    });
 
     client_1.on('c-response', function (inviteReply) {
       responseArr.push(inviteReply);
@@ -260,17 +175,18 @@ experiment('Serving 2 Client.', function () {
 
     var invite = {
       peerId: peer_5_Id,
-      predecessor: 'THIS WOULD BE SIGNAL DATA',
-      sucessor: 'THIS WOULD BE SIGNAL DATA'
+      predecessor: '5-P',
+      sucessor: '5-S'
     };
 
     client_5.emit('s-join', invite);
 
-
     function verify() {
-      if (responseArr.length < 5 || predecessorArr.length < 5 || sucessorArr.length < 5) {
+      if (responseArr.length < 5) {
         return setTimeout(verify, 1000);
       }
+      // console.log('RESPONSE ARRAY\n', responseArr);
+      // add a test to check if the signal data was propagated circularly 
       done();
     }
 
@@ -278,6 +194,73 @@ experiment('Serving 2 Client.', function () {
   });
 
   test('connect one more client', {timeout: 1 * 60 * 1000}, function (done) {
+   
+    client_1.on('c-sucessor', function (invite) {
+      var inviteReply = {};
+      inviteReply.peerId = invite.peerId;
+      inviteReply.sucessor = 'c_sucessor_1';
+      client_1.emit('s-response', inviteReply);
+    });
+
+    client_2.on('c-sucessor', function (invite) {
+      var inviteReply = {};
+      inviteReply.peerId = invite.peerId;
+      inviteReply.sucessor = 'c_sucessor_2';
+      client_2.emit('s-response', inviteReply);
+    });
+
+    client_3.on('c-sucessor', function (invite) {
+      var inviteReply = {};
+      inviteReply.peerId = invite.peerId;
+      inviteReply.sucessor = 'c_sucessor_3';
+      client_3.emit('s-response', inviteReply);
+    });
+
+    client_4.on('c-sucessor', function (invite) {
+      var inviteReply = {};
+      inviteReply.peerId = invite.peerId;
+      inviteReply.sucessor = 'c_sucessor_4';
+      client_4.emit('s-response', inviteReply);
+    });
+
+    client_5.on('c-sucessor', function (invite) {
+      var inviteReply = {};
+      inviteReply.peerId = invite.peerId;
+      inviteReply.sucessor = 'c_sucessor_5';
+      client_5.emit('s-response', inviteReply);
+    });
+
+    client_1.on('c-predecessor', function (invite) {
+      var inviteReply = {};
+      inviteReply.peerId = invite.peerId;
+      inviteReply.predecessor = 'c_predecessor_1';
+      client_1.emit('s-response', inviteReply);
+    });
+    client_2.on('c-predecessor', function (invite) {
+      var inviteReply = {};
+      inviteReply.peerId = invite.peerId;
+      inviteReply.predecessor = 'c_predecessor_2';
+      client_2.emit('s-response', inviteReply);
+    });
+    client_3.on('c-predecessor', function (invite) {
+      var inviteReply = {};
+      inviteReply.peerId = invite.peerId;
+      inviteReply.predecessor = 'c_predecessor_3';
+      client_3.emit('s-response', inviteReply);
+    });
+    client_4.on('c-predecessor', function (invite) {
+      var inviteReply = {};
+      inviteReply.peerId = invite.peerId;
+      inviteReply.predecessor = 'c_predecessor_4';
+      client_4.emit('s-response', inviteReply);
+    });
+    client_5.on('c-predecessor', function (invite) {
+      var inviteReply = {};
+      inviteReply.peerId = invite.peerId;
+      inviteReply.predecessor = 'c_predecessor_5';
+      client_5.emit('s-response', inviteReply);
+    });
+
     var client_6 = io.connect(socketURL, options);
     
     client_6.on('connect', function() { 
@@ -291,11 +274,14 @@ experiment('Serving 2 Client.', function () {
 
       client_6.emit('s-join', invite);
       client_6.on('c-response', function (inviteReply) {
+        // console.log('inviteReply', inviteReply);
         done();
       });
     });
 
+
   });
+
 
 });
 

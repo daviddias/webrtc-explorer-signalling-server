@@ -55,7 +55,6 @@ function ioConnectionHandler(socket) {
   }
 
   function peerJoinResponse (inviteReply) {
-
     if (inviteReply.predecessor) {
       console.log('received predecessor data for peer { peerId: %s }', inviteReply.peerId);
       peerTable[inviteReply.peerId].inviteReply.predecessor = inviteReply.predecessor;
@@ -95,8 +94,15 @@ function bootstrap(invite, socket) {
     var sortedPeerTable = sortPeerTable();
     peerIds.map(function (peerId) {   
       var p_s = predecessorAndSucessor(peerId, sortedPeerTable);
-      peerTable[p_s.predecessorId].socket.emit('c-predecessor', peerTable[peerId].invite);
-      peerTable[p_s.sucessorId].socket.emit('c-sucessor', peerTable[peerId].invite);
+           
+      // my predecessor is the other node sucessor and vice versa
+      var inviteReply = {
+        peerId: peerId,
+        predecessor: peerTable[p_s.predecessorId].invite.sucessor,
+        sucessor: peerTable[p_s.sucessorId].invite.predecessor
+      };
+
+      peerTable[peerId].socket.emit('c-response', inviteReply);
     });
     booted = true;
   } 
