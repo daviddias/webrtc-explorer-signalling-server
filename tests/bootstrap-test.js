@@ -11,275 +11,251 @@ var before = lab.before;
 var after = lab.after;
 var expect = Lab.expect;
 
-experiment('Serving 2 Client.', function () {
-  var server;
-  var client_1;
-  var client_2;
-  var client_3;
-  var client_4;
-  var client_5;
+experiment(':', function () {
+  var signalingServer;
+  var c1, c2, c3, c4, c5;
+  var peer1Id, peer2Id, peer3Id, peer4Id, peer5Id;
 
-  var peer_1_Id;
-  var peer_2_Id;
-  var peer_3_Id;
-  var peer_4_Id;
-  var peer_5_Id;
-
-  var options ={
-    transports: ['websocket'],
-    'force new connection': true
-  };
-
+  var options = { transports: ['websocket'], 'force new connection': true };
   var socketURL = 'http://localhost:9000';
 
   before(function (done) {
-    server = spawn('node', ['./index.js']);
-    server.stdout.on('data', function (data) {
-      // console.log('stdout: ' + data);
-    });
-    server.stderr.on('data', function (data) {
-      // console.log('stderr: ' + data);
-    });
-
-    setTimeout(function () { 
-      done(); 
-    }, 1000);
+    signalingServer = spawn('node', ['./index.js']);
+    signalingServer.stdout.on('data', function (data) {  /* console.log('stdout: ' + data); */ });
+    signalingServer.stderr.on('data', function (data) {  /* console.log('stderr: ' + data); */ });
+    setTimeout(function () { done(); }, 1000);
   });
 
   after(function (done) {
-    client_1.disconnect();
-    client_2.disconnect();
-    client_3.disconnect();
-    client_4.disconnect();
-    client_5.disconnect();
+    c1.disconnect();
+    c2.disconnect();
+    c3.disconnect();
+    c4.disconnect();
+    c5.disconnect();
 
     setTimeout(function () { 
-      server.on('close', function (code) {
-        // console.log('cp exited: ' + code);
+      signalingServer.on('close', function (code) { 
+        /* console.log('cp exited: ' + code); */
         done();
       });
 
-      server.kill(); 
+      signalingServer.kill(); 
     }, 1500);
   });
 
   test('connect the first client', function (done) {
-    client_1 = io.connect(socketURL, options);
-    client_1.on('connect', function() { 
-      done(); 
-    });
+    c1 = io.connect(socketURL, options);
+    c1.on('connect', function() { done(); });
   });
 
   test('connect the second client', function (done) {
-    client_2 = io.connect(socketURL, options);
-    client_2.on('connect', function() { 
-      done(); 
-    });
+    c2 = io.connect(socketURL, options);
+    c2.on('connect', function() { done(); });
   });
 
   test('connect the third client', function (done) {
-    client_3 = io.connect(socketURL, options);
-    client_3.on('connect', function() { 
-      done(); 
-    });
+    c3 = io.connect(socketURL, options);
+    c3.on('connect', function() { done(); });
   });
 
   test('connect the fourth client', function (done) {
-    client_4 = io.connect(socketURL, options);
-    client_4.on('connect', function() { 
-      done(); 
-    });
+    c4 = io.connect(socketURL, options);
+    c4.on('connect', function() { done(); });
   });
 
   test('connect the fifth client', function (done) {
-    client_5 = io.connect(socketURL, options);
-    client_5.on('connect', function() { 
-      done(); 
-    });
+    c5 = io.connect(socketURL, options);
+    c5.on('connect', function() { done(); });
   });
 
 
   test('first of 5 clients joins', function (done) {
-    peer_1_Id = idGen();
-
-    var invite = {
-      peerId: peer_1_Id,
-      predecessor: '1-P',
-      sucessor: '1-S'
-    };
-
-    client_1.emit('s-join', invite);
+    peer1Id = idGen();
+    c1.emit('s-join', { peerId: peer1Id, signalData: { predecessor: '1-P', sucessor: '1-S' }});
     done();
   });
 
   test('second of 5 clients joins', function (done) {
-    peer_2_Id = idGen();
-
-    var invite = {
-      peerId: peer_2_Id,
-      predecessor: '2-P',
-      sucessor: '2-S'
-    };
-
-    client_2.emit('s-join', invite);
+    peer2Id = idGen();
+    c2.emit('s-join', { peerId: peer2Id, signalData: { predecessor: '2-P', sucessor: '2-S' }});
     done();
   });
 
   test('third of 5 clients joins', function (done) {
-    peer_3_Id = idGen();
-
-    var invite = {
-      peerId: peer_3_Id,
-      predecessor: '3-P',
-      sucessor: '3-S'
-    };
-
-    client_3.emit('s-join', invite);
+    peer3Id = idGen();
+    c3.emit('s-join', { peerId: peer3Id, signalData: { predecessor: '3-P', sucessor: '3-S' }});
     done();
   });
 
   test('fourth of 5 clients joins', function (done) {
-    peer_4_Id = idGen();
-
-    var invite = {
-      peerId: peer_4_Id,
-      predecessor: '4-P',
-      sucessor: '4-S'
-    };
-
-    client_4.emit('s-join', invite);
+    peer4Id = idGen();
+    c4.emit('s-join', { peerId: peer4Id, signalData: { predecessor: '4-P', sucessor: '4-S'}});
     done();
   });  
 
   test('last of 5 clients join and network gets bootstrapped', {timeout: 1 * 60 * 1000},function (done) {
     var responseArr = [];
+    var count = 0;
 
-    client_1.on('c-response', function (inviteReply) {
-      responseArr.push(inviteReply);
-    });
-    client_2.on('c-response', function (inviteReply) {
-      responseArr.push(inviteReply);
-    });
-    client_3.on('c-response', function (inviteReply) {
-      responseArr.push(inviteReply);
-    });
-    client_4.on('c-response', function (inviteReply) {
-      responseArr.push(inviteReply);
-    });
-    client_5.on('c-response', function (inviteReply) {
-      responseArr.push(inviteReply);
+    c1.on('c-warmup-predecessor', function (invite) {
+      c1.emit('s-join-next', {returnTo: invite.peerId});
     });
 
+    c2.on('c-warmup-predecessor', function (invite) {
+      c2.emit('s-join-next', {returnTo: invite.peerId});
+    });
 
-    peer_5_Id = idGen();
+    c3.on('c-warmup-predecessor', function (invite) {
+      c3.emit('s-join-next', {returnTo: invite.peerId});
+    });
 
-    var invite = {
-      peerId: peer_5_Id,
-      predecessor: '5-P',
-      sucessor: '5-S'
-    };
+    c4.on('c-warmup-predecessor', function (invite) {
+      c4.emit('s-join-next', {returnTo: invite.peerId});
+    });
 
-    client_5.emit('s-join', invite);
+    c5.on('c-warmup-predecessor', function (invite) {
+      c5.emit('s-join-next', {returnTo: invite.peerId});
+    });
+
+    c1.on('c-warmup-sucessor', function (invite){ count += 1; });
+    c2.on('c-warmup-sucessor', function (invite){ count += 1; });
+    c3.on('c-warmup-sucessor', function (invite){ count += 1; });
+    c4.on('c-warmup-sucessor', function (invite){ count += 1; });
+    c5.on('c-warmup-sucessor', function (invite){ count += 1; });
+
+
+    peer5Id = idGen();
+    c5.emit('s-join', { peerId: peer5Id, signalData: { predecessor: '5-P', sucessor: '5-S' }});
 
     function verify() {
-      if (responseArr.length < 5) {
-        return setTimeout(verify, 1000);
-      }
-      // console.log('RESPONSE ARRAY\n', responseArr);
-      // add a test to check if the signal data was propagated circularly 
+      if (count < 5) { return setTimeout(verify, 1000); }
       done();
     }
-
     verify();
   });
 
+
+
   test('connect one more client', {timeout: 1 * 60 * 1000}, function (done) {
+
+
+    // s-join
+    //   c-sucessor
+    //     s-response
+    //   c-predecessor
+    //     s-response
+    //       c-response
+
    
-    client_1.on('c-sucessor', function (invite) {
-      var inviteReply = {};
-      inviteReply.peerId = invite.peerId;
-      inviteReply.sucessor = 'c_sucessor_1';
-      client_1.emit('s-response', inviteReply);
-    });
-
-    client_2.on('c-sucessor', function (invite) {
-      var inviteReply = {};
-      inviteReply.peerId = invite.peerId;
-      inviteReply.sucessor = 'c_sucessor_2';
-      client_2.emit('s-response', inviteReply);
-    });
-
-    client_3.on('c-sucessor', function (invite) {
-      var inviteReply = {};
-      inviteReply.peerId = invite.peerId;
-      inviteReply.sucessor = 'c_sucessor_3';
-      client_3.emit('s-response', inviteReply);
-    });
-
-    client_4.on('c-sucessor', function (invite) {
-      var inviteReply = {};
-      inviteReply.peerId = invite.peerId;
-      inviteReply.sucessor = 'c_sucessor_4';
-      client_4.emit('s-response', inviteReply);
-    });
-
-    client_5.on('c-sucessor', function (invite) {
-      var inviteReply = {};
-      inviteReply.peerId = invite.peerId;
-      inviteReply.sucessor = 'c_sucessor_5';
-      client_5.emit('s-response', inviteReply);
-    });
-
-    client_1.on('c-predecessor', function (invite) {
-      var inviteReply = {};
-      inviteReply.peerId = invite.peerId;
-      inviteReply.predecessor = 'c_predecessor_1';
-      client_1.emit('s-response', inviteReply);
-    });
-    client_2.on('c-predecessor', function (invite) {
-      var inviteReply = {};
-      inviteReply.peerId = invite.peerId;
-      inviteReply.predecessor = 'c_predecessor_2';
-      client_2.emit('s-response', inviteReply);
-    });
-    client_3.on('c-predecessor', function (invite) {
-      var inviteReply = {};
-      inviteReply.peerId = invite.peerId;
-      inviteReply.predecessor = 'c_predecessor_3';
-      client_3.emit('s-response', inviteReply);
-    });
-    client_4.on('c-predecessor', function (invite) {
-      var inviteReply = {};
-      inviteReply.peerId = invite.peerId;
-      inviteReply.predecessor = 'c_predecessor_4';
-      client_4.emit('s-response', inviteReply);
-    });
-    client_5.on('c-predecessor', function (invite) {
-      var inviteReply = {};
-      inviteReply.peerId = invite.peerId;
-      inviteReply.predecessor = 'c_predecessor_5';
-      client_5.emit('s-response', inviteReply);
-    });
-
-    var client_6 = io.connect(socketURL, options);
-    
-    client_6.on('connect', function() { 
-      var peer_6_Id = idGen();
-
-      var invite = {
-        peerId: peer_6_Id,
-        predecessor: 'THIS WOULD BE SIGNAL DATA',
-        sucessor: 'THIS WOULD BE SIGNAL DATA'
+    c1.on('c-sucessor', function (invite) {
+      var inviteReply = {
+        peerId: invite.peerId,
+        signalData: {
+          sucessor: 'signal data'
+        }
       };
+      c1.emit('s-response', inviteReply);
+    });
 
-      client_6.emit('s-join', invite);
-      client_6.on('c-response', function (inviteReply) {
+    c2.on('c-sucessor', function (invite) {
+      var inviteReply = {
+        peerId: invite.peerId,
+        signalData: {
+          sucessor: 'signal data'
+        }
+      };
+      c2.emit('s-response', inviteReply);
+    });
+
+    c3.on('c-sucessor', function (invite) {
+      var inviteReply = {
+        peerId: invite.peerId,
+        signalData: {
+          sucessor: 'signal data'
+        }
+      };
+      c3.emit('s-response', inviteReply);
+    });
+
+    c4.on('c-sucessor', function (invite) {
+      var inviteReply = {
+        peerId: invite.peerId,
+        signalData: {
+          sucessor: 'signal data'
+        }
+      };
+      c4.emit('s-response', inviteReply);
+    });
+
+    c5.on('c-sucessor', function (invite) {
+      var inviteReply = {
+        peerId: invite.peerId,
+        signalData: {
+          sucessor: 'signal data'
+        }
+      };
+      c5.emit('s-response', inviteReply);
+    });
+
+    c1.on('c-predecessor', function (invite) {
+      var inviteReply = {
+        peerId: invite.peerId,
+        signalData: {
+          predecessor: 'signal data'
+        }
+      };
+      c1.emit('s-response', inviteReply);
+    });
+    c2.on('c-predecessor', function (invite) {
+      var inviteReply = {
+        peerId: invite.peerId,
+        signalData: {
+          predecessor: 'signal data'
+        }
+      };
+      c2.emit('s-response', inviteReply);
+    });
+    c3.on('c-predecessor', function (invite) {
+      var inviteReply = {
+        peerId: invite.peerId,
+        signalData: {
+          predecessor: 'signal data'
+        }
+      };
+      c3.emit('s-response', inviteReply);
+    });
+    
+    c4.on('c-predecessor', function (invite) {
+      var inviteReply = {
+        peerId: invite.peerId,
+        signalData: { predecessor: 'signal data' }
+      };
+      c4.emit('s-response', inviteReply);
+    });
+
+    c5.on('c-predecessor', function (invite) {
+      var inviteReply = {
+        peerId: invite.peerId,
+        signalData: {
+          predecessor: 'signal data'
+        }
+      };
+      c5.emit('s-response', inviteReply);
+    });
+
+    var c6 = io.connect(socketURL, options);
+    
+    c6.on('connect', function() { 
+      var peer6Id = idGen();
+
+      var invite = { peerId: peer6Id, signalData: { predecessor: 'c-6', sucessor: 'c-6' } };
+
+      c6.emit('s-join', invite);
+      c6.on('c-response', function (inviteReply) {
         // console.log('inviteReply', inviteReply);
         done();
       });
     });
-
-
   });
 
 

@@ -1,5 +1,5 @@
 var hapi = require('Hapi');
-var io   = require('socket.io');
+var io = require('socket.io');
 var bigInt = require('big-integer');
 
 var server = new hapi.Server(parseInt(process.env.PORT) || 9000, { cors: true });
@@ -98,19 +98,15 @@ function ioConnectionHandler(socket) {
   function peerJoinResponse (inviteReply) {
     if (inviteReply.signalData.predecessor) {
       console.log('received predecessor data for peer { peerId: %s }', inviteReply.peerId);
-      console.log('PEERS AVAILABLE: ', Object.keys(peerTable));
-
-      console.log('OBJECT', peerTable[inviteReply.peerId]);
+      // console.log('PEERS AVAILABLE: ', Object.keys(peerTable));
+      // console.log('OBJECT', peerTable[inviteReply.peerId]);
       peerTable[inviteReply.peerId].inviteReply.signalData.predecessor = inviteReply.signalData.predecessor;
     }
 
     if (inviteReply.signalData.sucessor) {
       console.log('received sucessor data for peer { peerId: %s }', inviteReply.peerId);     
-      console.log('PEERS AVAILABLE: ', Object.keys(peerTable));
-
-      console.log('OBJECT', peerTable[inviteReply.peerId]);
-
-
+      // console.log('PEERS AVAILABLE: ', Object.keys(peerTable));
+      // console.log('OBJECT', peerTable[inviteReply.peerId]);
       peerTable[inviteReply.peerId].inviteReply.signalData.sucessor = inviteReply.signalData.sucessor;
     }
 
