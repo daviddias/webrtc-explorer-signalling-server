@@ -92,21 +92,16 @@ function ioConnectionHandler(socket) {
   }
 
 
-
   /// Normal Response Process
 
   function peerJoinResponse (inviteReply) {
     if (inviteReply.signalData.predecessor) {
       console.log('received predecessor data for peer { peerId: %s }', inviteReply.peerId);
-      // console.log('PEERS AVAILABLE: ', Object.keys(peerTable));
-      // console.log('OBJECT', peerTable[inviteReply.peerId]);
       peerTable[inviteReply.peerId].inviteReply.signalData.predecessor = inviteReply.signalData.predecessor;
     }
 
     if (inviteReply.signalData.sucessor) {
       console.log('received sucessor data for peer { peerId: %s }', inviteReply.peerId);     
-      // console.log('PEERS AVAILABLE: ', Object.keys(peerTable));
-      // console.log('OBJECT', peerTable[inviteReply.peerId]);
       peerTable[inviteReply.peerId].inviteReply.signalData.sucessor = inviteReply.signalData.sucessor;
     }
 
