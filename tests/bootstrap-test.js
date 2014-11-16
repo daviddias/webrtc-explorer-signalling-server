@@ -2,7 +2,7 @@ var Lab = require('lab');
 var lab = exports.lab = Lab.script();
 var io = require('socket.io-client');
 var spawn = require('child_process').spawn;
-var git_sha1 = require('git-sha1');
+var uuid = require('webrtc-chord-uuid');
 
 var experiment = lab.experiment;
 var test = lab.test;
@@ -70,25 +70,25 @@ experiment(':', function () {
 
 
   test('first of 5 clients joins', function (done) {
-    peer1Id = idGen();
+    peer1Id = uuid.gen();
     c1.emit('s-join', { peerId: peer1Id, signalData: { predecessor: '1-P', sucessor: '1-S' }});
     done();
   });
 
   test('second of 5 clients joins', function (done) {
-    peer2Id = idGen();
+    peer2Id = uuid.gen();
     c2.emit('s-join', { peerId: peer2Id, signalData: { predecessor: '2-P', sucessor: '2-S' }});
     done();
   });
 
   test('third of 5 clients joins', function (done) {
-    peer3Id = idGen();
+    peer3Id = uuid.gen();
     c3.emit('s-join', { peerId: peer3Id, signalData: { predecessor: '3-P', sucessor: '3-S' }});
     done();
   });
 
   test('fourth of 5 clients joins', function (done) {
-    peer4Id = idGen();
+    peer4Id = uuid.gen();
     c4.emit('s-join', { peerId: peer4Id, signalData: { predecessor: '4-P', sucessor: '4-S'}});
     done();
   });  
@@ -124,7 +124,7 @@ experiment(':', function () {
     c5.on('c-warmup-sucessor', function (invite){ count += 1; });
 
 
-    peer5Id = idGen();
+    peer5Id = uuid.gen();
     c5.emit('s-join', { peerId: peer5Id, signalData: { predecessor: '5-P', sucessor: '5-S' }});
 
     function verify() {
@@ -246,7 +246,7 @@ experiment(':', function () {
     var c6 = io.connect(socketURL, options);
     
     c6.on('connect', function() { 
-      var peer6Id = idGen();
+      var peer6Id = uuid.gen();
 
       var invite = { peerId: peer6Id, signalData: { predecessor: 'c-6', sucessor: 'c-6' } };
 
@@ -261,6 +261,6 @@ experiment(':', function () {
 
 });
 
-function idGen () {
-  return git_sha1((~~(Math.random() * 1e9)).toString(36) + Date.now());
-}
+// function uuid.gen () {
+//   return git_sha1((~~(Math.random() * 1e9)).toString(36) + Date.now());
+// }
