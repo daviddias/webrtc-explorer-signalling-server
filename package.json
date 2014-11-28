@@ -1,6 +1,6 @@
 {
   "name": "webrtc-chord-signaling-server",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "",
   "main": "index.js",
   "dependencies": {
@@ -21,7 +21,7 @@
     "codestyle": "./node_modules/.bin/jscs -p google src/index.js tests/*.js",
     "lint": "./node_modules/.bin/jshint .",
     "test": "node ./node_modules/.bin/lab -r tap tests/*-test.js | ./node_modules/.bin/tap-spec",
-    "test-cov": "node ./node_modules/.bin/lab -t 80 tests/*-test.js",
+    "test-cov": "node ./node_modules/.bin/lab -t 70 tests/*-test.js",
     "test-cov-html": "node ./node_modules/.bin/lab -r html -o coverage.html tests/*-test.js"
   },
   "precommit": [
