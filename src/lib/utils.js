@@ -7,18 +7,15 @@ exports.sortPeerTable = function(peerTable) {
                 .keys(peerTable)
                 .sort(function(a, b) {
                   var aBig = bigInt(a, 16);
-                  var bBig = bigInt(b, 16); 
-                  if (aBig.lesser(bBig)) { 
-                    return -1; 
+                  var bBig = bigInt(b, 16);
+                  if (aBig.lesser(bBig)) {
+                    return -1;
                   }
                   if (aBig.greater(bBig)) {
-                    return 1; 
+                    return 1;
                   }
                   return 0;
                 });
-                // .map(function(key){
-                //   return peerTable[key];
-                // });         
   return sorted;
 };
 
@@ -28,9 +25,9 @@ exports.sucessorToId = function(peerId, sortedPeerTable) {
   var bigPeerId = bigInt(peerId, 16);
   var done = false;
 
-  s.forEach(function (value, index) {
-    if(done) { 
-      return; 
+  s.forEach(function(value, index) {
+    if (done) {
+      return;
     }
     var bigValue = bigInt(value, 16);
 
@@ -46,18 +43,15 @@ exports.sucessorToId = function(peerId, sortedPeerTable) {
       return;
     }
 
-    if(index + 1 === s.length) {
+    if (index + 1 === s.length) {
       r = s[0];
       done = true;
       return;
     }
 
-
-
   });
   return r;
 };
-
 
 exports.predecessorToId = function(peerId, sortedPeerTable) {
   var s = sortedPeerTable;
@@ -65,26 +59,28 @@ exports.predecessorToId = function(peerId, sortedPeerTable) {
   var bigPeerId = bigInt(peerId, 16);
   var done = false;
 
-  s.forEach(function (value, index) {
-    if(done) { return; }
+  s.forEach(function(value, index) {
+    if (done) {
+      return;
+    }
 
-    if(index + 1 === s.length && bigPeerId.greater(bigInt(value, 16))) {
+    if (index + 1 === s.length && bigPeerId.greater(bigInt(value, 16))) {
       r = value;
       done = true;
       return;
     }
 
-    if(bigPeerId.lesser(bigInt(value, 16)) || 
+    if (bigPeerId.lesser(bigInt(value, 16)) ||
       bigPeerId.compare(bigInt(value, 16)) === 0) {
-      if(index === 0) {
-        r = s[s.length-1];
+      if (index === 0) {
+        r = s[s.length - 1];
         done = true;
-        return;     
+        return;
       }
 
-      r = s[index-1];
+      r = s[index - 1];
       done = true;
-      return;      
+      return;
     }
   });
   return r;
