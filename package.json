@@ -1,44 +1,44 @@
 {
-  "name": "webrtc-ring-signaling-server",
+  "name": "webrtc-explore-signalling-server",
   "version": "0.5.0",
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "big-integer": "^1.3.18",
-    "hapi": "^6.11.1",
-    "socket.io": "^1.1.0"
+    "config": "^1.10.0",
+    "dht-id": "^1.0.0",
+    "hapi": "^8.1.0",
+    "socket.io": "^1.2.1"
   },
   "devDependencies": {
+    "code": "^1.2.1",
     "jscs": "^1.8.1",
     "jshint": "^2.5.6",
-    "lab": "^4.6.2",
+    "lab": "^5.2.0",
     "precommit-hook": "^1.0.7",
-    "socket.io-client": "^1.1.0",
-    "tap-spec": "^1.0.0",
-    "webrtc-chord-uuid": "^1.0.0"
+    "request": "^2.51.0",
+    "socket.io-client": "^1.2.1",
+    "tap-spec": "^1.0.0"
   },
   "scripts": {
     "start": "node src/index.js",
-    "codestyle": "./node_modules/.bin/jscs -p google src/index.js src/lib/*.js tests/*.js",
+    "codestyle": "./node_modules/.bin/jscs src/index.js tests/*.js",
     "lint": "./node_modules/.bin/jshint .",
     "test": "node ./node_modules/.bin/lab -r tap tests/*-test.js | ./node_modules/.bin/tap-spec",
     "test-cov": "node ./node_modules/.bin/lab -t 70 tests/*-test.js",
     "test-cov-html": "node ./node_modules/.bin/lab -r html -o coverage.html tests/*-test.js"
   },
   "precommit": [
-    "codestyle",
     "lint",
-    "test",
-    "test-cov"
+    "test"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/diasdavid/webrtc-ring-signaling-server.git"
+    "url": "https://github.com/diasdavid/webrtc-explorer-signalling-server.git"
   },
   "author": "David Dias <daviddias.p@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/diasdavid/webrtc-ring-signaling-server/issues"
+    "url": "https://github.com/diasdavid/webrtc-explorer-signalling-server/issues"
   },
-  "homepage": "https://github.com/diasdavid/webrtc-ring-signaling-server"
+  "homepage": "https://github.com/diasdavid/webrtc-explorer-signalling-server"
 }
