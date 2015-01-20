@@ -29,7 +29,8 @@
   },
   "precommit": [
     "lint",
-    "test"
+    "test",
+    "codestyle"
   ],
   "repository": {
     "type": "git",
