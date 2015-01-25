@@ -84,7 +84,7 @@ function ioHandler(socket) {
     }
 
     function updateFingers() {
-        if (Object.keys(peers) < 2) {
+        if (Object.keys(peers).length < 2) {
             return;
         }
 
