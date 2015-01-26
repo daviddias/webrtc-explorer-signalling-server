@@ -41,6 +41,7 @@ var peers = {};
 //             current: <fingerId>
 //         }
 //     }
+//     predecessorId
 // }
 
 var sockets = {};
@@ -104,6 +105,20 @@ function ioHandler(socket) {
         });
 
         sortedPeersId.forEach(function(peerId) {
+
+            // predecessor
+            var predecessorId = predecessorTo(peerId, sortedPeersId);
+
+            if (peers[peerId].predecessorId !== predecessorId) {
+                sockets[peers[peerId].socketId].emit('c-predecessor', {
+                    predecessorId: predecessorId
+                });
+
+                peers[peerId].predecessorId = predecessorId;
+            }
+
+            // sucessors
+
             Object.keys(peers[peerId].fingerTable).some(function(rowIndex) {
                 var fingerId = sucessorTo(peers[peerId]
                                     .fingerTable[rowIndex]
@@ -128,7 +143,7 @@ function ioHandler(socket) {
             });
         });
 
-        function sucessorTo (pretendedId, sortedIdList) {
+        function sucessorTo(pretendedId, sortedIdList) {
             pretendedId = new Id(pretendedId).toDec();
             sortedIdList = sortedIdList.map(function(inHex) {
                 return new Id(inHex).toDec();
@@ -154,6 +169,20 @@ function ioHandler(socket) {
             });
 
             return new Id(sucessorId).toHex();
+        }
+
+        function predecessorTo(peerId, sortedIdList) {
+            var index = sortedIdList.indexOf(peerId);
+
+            var predecessorId;
+
+            if (index === 0) {
+                predecessorId = sortedIdList[sortedIdList.length - 1];
+            } else {
+                predecessorId = sortedIdList[index - 1];
+            }
+
+            return new Id(predecessorId).toHex();
         }
     }
 

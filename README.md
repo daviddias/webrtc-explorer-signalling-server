@@ -20,7 +20,8 @@ webrtc-explorer Signalling Server
 
 ## Events emitted by the server
 
--`c-finger-update` - let a client know that he should update one of his fingers
+- `c-finger-update` - let a client know that he should update one of his fingers
+- `c-predecessor` - let a client know of his predecessorId
 
 - `c-offer-accepted` - forward response signaling data
 
