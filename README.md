@@ -5,8 +5,8 @@ webrtc-explorer Signalling Server
 
 # Badgers
 
-[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/diasdavid/webrtc-ring?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) 
-[![Dependency Status](https://david-dm.org/diasdavid/webrtc-signalling-server.svg)](https://david-dm.org/diasdavid/webrtc-ring-signalling-server)
+[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/diasdavid/webrtc-explorer?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) 
+[![Dependency Status](https://david-dm.org/diasdavid/webrtc-explorer-signalling-server.svg)](https://david-dm.org/diasdavid/webrtc-explorer-signalling-server)
 
 # Spec
 
