@@ -73,9 +73,11 @@ function ioHandler(socket) {
     }
 
     function calculateIdealFingers(peerId) {
+        var fingers = config.get('explorer.fingers');
         var k = 1;
-        while (k <= config.get('explorer.n-fingers')) {
-            var ideal = (peerId.toDec() + Math.pow(2, k)) % Math.pow(2, 48);
+        while (k <= fingers.length) {
+            var ideal = (peerId.toDec() + Math.pow(2, fingers[k - 1])) %
+                Math.pow(2, 48);
             peers[peerId.toHex()].fingerTable[k] = {
                 ideal: new Id(ideal).toHex(),
                 current: undefined
