@@ -3,7 +3,11 @@ webrtc-explorer Signalling Server
 
 > The `webrtc-explorer Signaling Server` implements the spec defined for the `webrtc-explorer` browser based DHT work properly, please refer to the [webrtc-explorer docs](https://github.com/diasdavid/webrtc-explorer) for instructions. 
 
-## Project Information
+## Project Information - v2
+
+The 2nd version of webrtc-explorer-signalling-server is a continuation of the work developed by the first iteration, but focused on enabling the 2nd version of [webrtc-explorer]()
+
+## [Project Information - v1.1.1](https://github.com/diasdavid/webrtc-explorer-signalling-server/releases/tag/v1.1.1)
 
 > [David Dias MSc in Peer-to-Peer Networks by Technical University of Lisbon](https://github.com/diasdavid/browserCloudjs#research-and-development)
 
