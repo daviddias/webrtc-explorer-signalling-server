@@ -11,26 +11,23 @@
   },
   "devDependencies": {
     "code": "^1.2.1",
-    "jscs": "^1.8.1",
-    "jshint": "^2.5.6",
     "lab": "^5.2.0",
     "precommit-hook": "^1.0.7",
     "request": "^2.51.0",
     "socket.io-client": "^1.2.1",
+    "standard": "^5.3.1",
     "tap-spec": "^1.0.0"
   },
   "scripts": {
     "start": "node src/index.js",
-    "codestyle": "./node_modules/.bin/jscs src/index.js tests/*.js",
-    "lint": "./node_modules/.bin/jshint .",
+    "lint": "./node_modules/.bin/standard",
     "test": "node ./node_modules/.bin/lab -r tap tests/*-test.js | ./node_modules/.bin/tap-spec",
     "test-cov": "node ./node_modules/.bin/lab -t 70 tests/*-test.js",
     "test-cov-html": "node ./node_modules/.bin/lab -r html -o coverage.html tests/*-test.js"
   },
   "precommit": [
     "lint",
-    "test",
-    "codestyle"
+    "test"
   ],
   "repository": {
     "type": "git",
